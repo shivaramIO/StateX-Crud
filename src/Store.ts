@@ -3,7 +3,7 @@ import { StateXGetter, StateXSetter } from '@cloudio/statex';
 const url = 'http://localhost:3000/api';
 
 const getOptions = (reqBody: any) => {
-  let bearer_token = 'WfKc_ZsfwBrhE2Ae8ZLoo';
+  let bearer_token = '2aVEDN9L_Xvmhxf4XMhp8';
   const bearer = 'Bearer ' + bearer_token;
   const options = {
     method: 'POST',
@@ -25,8 +25,9 @@ class Store {
     this.set = set;
     this.get = get;
   }
+
   getRecords() {
-    // return this.get(['root', 'page22', this.ds, this.alias, 'records']);
+    // @ts-ignore
     return this.get(['employee', 'list']);
   }
 
@@ -39,7 +40,7 @@ class Store {
       [this.alias]: {
         ds: this.ds,
         query: {
-          filter: {},
+          filter: { _deleted: 'N' },
         },
       },
     };
@@ -71,6 +72,34 @@ class Store {
         id,
       },
     });
+  }
+
+  updateRecordPartial(id: number, partialRecord: any) {
+    const currentRecord: any = this.get(['employee', 'list', ':id'], {
+      params: {
+        id,
+      },
+    });
+    // const partialRecord = { name, _rs: 'U' };
+
+    const newRecord = { ...currentRecord, ...partialRecord, _rs: 'U' };
+    this.set(['employee', 'list', ':id'], newRecord, {
+      params: {
+        id,
+      },
+    });
+  }
+
+  insertRecordPartial(partialRecord: any) {
+    this.set(['employee', 'list'], (oldEmpList: any) => [
+      ...oldEmpList,
+      {
+        ...partialRecord,
+        // @ts-ignore
+        // _id: this.getRecords().length + 1,
+        _rs: 'I',
+      },
+    ]);
   }
 
   updateRecords(records: any) {
@@ -108,7 +137,7 @@ class Store {
   save() {
     //@ts-ignore
     const dirtyRecords = this.getRecords().filter(
-      (record: any) => record._rs !== 'Q'
+      (record: any) => record._rs !== 'Q',
     );
     console.log('dirtyRecords', dirtyRecords);
     const reqBody = {
@@ -146,11 +175,12 @@ export const getDataStore = (
   ds: string,
   alias: string,
   set: StateXSetter,
-  get: StateXGetter
+  get: StateXGetter,
 ) => {
   let store = cache.get(ds + alias);
   if (!store) {
     store = new Store(ds, alias, set, get);
+    store.query();
     cache.set(ds + alias, store);
   }
   return store;

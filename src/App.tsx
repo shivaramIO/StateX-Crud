@@ -1,11 +1,11 @@
 import React from 'react';
-import { useStateXValue } from '@cloudio/statex';
-import Crud from './Crud';
-import CrudWithStore from './CrudWithStore';
-import EmloyeesUIWithStore from './EmloyeesUIWithStore';
+import { useStateXValue, useStateX } from '@cloudio/statex';
+// import EmloyeesUIWithStore from './EmloyeesUIWithStore';
+import Demo from './Demo';
 
 function JSONPayload() {
-  const json = useStateXValue([], []);
+  useStateX(['employee', 'list'], []);
+  const json = useStateXValue(['employee', 'list'], []);
   return (
     <>
       <h4>Path Object</h4>
@@ -17,8 +17,8 @@ function JSONPayload() {
 function App() {
   return (
     <>
-      <h2>Employee Details</h2>
-      <EmloyeesUIWithStore />
+      <h2>Demo Grid</h2>
+      <Demo />
       <JSONPayload />
     </>
   );

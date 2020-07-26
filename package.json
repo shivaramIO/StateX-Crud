@@ -4,6 +4,11 @@
   "private": true,
   "dependencies": {
     "@cloudio/statex": "^0.0.25",
+    "@devexpress/dx-react-core": "^2.7.0",
+    "@devexpress/dx-react-grid": "^2.7.0",
+    "@devexpress/dx-react-grid-material-ui": "^2.7.0",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "@testing-library/jest-dom": "^5.5.0",
     "@testing-library/react": "^10.0.4",
     "@testing-library/user-event": "^10.1.0",
