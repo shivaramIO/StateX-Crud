@@ -1,28 +1,39 @@
-import React from 'react';
-import {
-  useStateX,
-  useStateXValueSetter,
-  useStateXValue,
-} from '@cloudio/statex';
+import React, { useState } from 'react';
+
 import { getDataStore } from './useStateXStore';
 
 function CrudWithStore() {
-  const store = getDataStore('app-employees', 'employeesStore');
+  const [recs, setRecs] = useState([]);
+  const { records, query, currentRecord, currentRecordIndex } = getDataStore(
+    'app-employees',
+    'employeesStore'
+  );
 
-  const recordsList = store.query();
-  console.log('recordsList', recordsList);
+  let arrOfRecords: any = [];
 
-  console.log('store ', store);
-  console.log('cuurent record', store.currentRecord);
-  store.records.map((rec: any) => console.log(rec, 'rec'));
+  console.log(
+    'query ',
+    query.then((rec) => {
+      //   setRecs(rec);
+      arrOfRecords.push(rec);
+      console.log('recs', recs);
+    })
+  );
+
+  var result = arrOfRecords.map((record: any) => ({ name: record.name }));
+  console.log('result', result);
 
   return (
     <>
-      <h2> crud with store</h2>;
+      <h2> crud with store</h2>
+      currentRecord:{currentRecord}
+      currentRecordIndex:{currentRecordIndex}
+      {/* {recs.map((record: any) => {
+        console.log('individualrecord', record);
+      })} */}
+      {/* {result} */}
     </>
   );
-  // const employees = store.query();
-  //iterate employees
 }
 
 export default CrudWithStore;

@@ -8,7 +8,6 @@ import {
   useStateXSetter,
 } from '@cloudio/statex';
 import debounce from 'debounce';
-
 class Store {
   ds = '';
   alias: string;
@@ -23,10 +22,9 @@ class Store {
   }
 
   getRecords() {
-    return this.records;
+    return this.get(['root', 'page22', this.ds, this.alias, 'records']);
   }
-  query() {
-    console.log('this', this);
+  async query() {
     const reqBody = {
       [this.alias]: {
         ds: this.ds,
@@ -43,11 +41,9 @@ class Store {
       headers: { Authorization: bearer, 'Content-Type': 'application/json' },
       body: JSON.stringify(reqBody),
     };
-    fetch(url, options)
+    await fetch(url, options)
       .then((response) => response.json())
       .then((data) => {
-        console.log('data', data);
-
         this.records = data[this.alias].data;
         if (data[this.alias].data.length) {
           this.currentRecord = data[this.alias].data[0];
@@ -56,7 +52,6 @@ class Store {
           this.currentRecord = null;
           this.currentRecordIndex = -1;
         }
-
         this.set(
           ['root', 'page22', this.ds, this.alias, 'records'],
           this.records
@@ -75,18 +70,12 @@ export const getDataStore = (ds: string, alias: string) => {
     store = new Store(ds, alias);
     cache.set(ds + alias, store);
   }
-
-  //   store.records.push({ id: 0, name: 'Bharath', gender: 'M', bloodGroup: 'B+' });
-  //   store.records.push({ id: 1, name: 'Shiva', gender: 'M', bloodGroup: 'O+' });
-  //   store.records.push({
-  //     id: 2,
-  //     name: 'Jaswanth',
-  //     gender: 'M',
-  //     bloodGroup: 'B+',
-  //   });
-  const records = store.records;
-  const query = store.query;
-  return store;
+  return {
+    records: store.records,
+    query: store.query(),
+    currentRecord: store.currentRecord,
+    currentRecordIndex: store.currentRecordIndex,
+  };
 };
 
 export default Store;
