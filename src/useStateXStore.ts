@@ -7,7 +7,6 @@ import {
   StateXSetter,
   useStateXSetter,
 } from '@cloudio/statex';
-import debounce from 'debounce';
 class Store {
   ds = '';
   alias: string;
@@ -59,7 +58,6 @@ class Store {
       })
       .catch((error) => console.log('error from fetching', error));
   }
-  debounceQuery = debounce(this.query, 300);
 }
 
 const cache = new Map<string, Store>();
