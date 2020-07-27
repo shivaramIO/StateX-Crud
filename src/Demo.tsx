@@ -13,24 +13,39 @@ import {
   useStateX,
   useStateXGetter,
   useStateXSetter,
-  useStateXValue,
+  useStateXValueRemover,
+  selector,
+  useRemoveStateX,
 } from '@cloudio/statex';
 import { getDataStore } from './Store';
 
-export default () => {
-  useStateX(['employee', 'list'], []);
-  const ds = 'app-employees';
-  const alias = 'employeesStore';
-  const get = useStateXGetter();
-  const set = useStateXSetter();
-  const store = getDataStore(ds, alias, set, get);
+export default function Demo() {
+  const refresh = () => {
+    const filter = { _deleted: 'N' };
+    store.query(filter);
+  };
 
-  const rows: any = store.getRecords();
-  const [columns] = useState([
+  const columns = [
     { name: '_id', title: 'Id' },
     { name: 'name', title: 'Name' },
     { name: 'gender', title: 'Gender' },
     // { name: 'bloodGroup', title: 'Blood Group' },
+  ];
+  useStateX(['employee', 'list'], []);
+  useStateX(['employee', 'deleted-list'], []);
+  const ds = 'app-employees';
+  const alias = 'employeesStore';
+  const get = useStateXGetter();
+  const set = useStateXSetter();
+
+  const remover = useRemoveStateX(['employee', 'deleted-list']);
+
+  const store = getDataStore(ds, alias, set, get, remover);
+
+  const rows: any = store.getRecords();
+
+  const [editingStateColumnExtensions] = useState([
+    { columnName: '_id', editingEnabled: false },
   ]);
 
   const commitChanges = ({ added, changed, deleted }) => {
@@ -52,18 +67,23 @@ export default () => {
     }
     console.log(changedRows);
     store.save();
-    store.query();
+    // store.query();
   };
 
   return (
-    <Paper>
+    <>
+      <button onClick={refresh}>Refresh</button>
       <Grid rows={rows} columns={columns}>
-        <EditingState onCommitChanges={commitChanges} />
+        <EditingState
+          onCommitChanges={commitChanges}
+          columnExtensions={editingStateColumnExtensions}
+          // onDeletedRowIdsChange={onDeleteRows}
+        />
         <Table />
         <TableHeaderRow />
         <TableEditRow />
         <TableEditColumn showAddCommand showEditCommand showDeleteCommand />
       </Grid>
-    </Paper>
+    </>
   );
-};
+}
