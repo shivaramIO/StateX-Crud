@@ -1,78 +1,19 @@
-import {
-  useStateX,
-  useStateXValueSetter,
-  useStateXValue,
-  StateXGetter,
-  useStateXGetter,
-  StateXSetter,
-  useStateXSetter,
-} from '@cloudio/statex';
-class Store {
-  ds = '';
-  alias: string;
-  //   records: any = [];
-  currentRecord: any;
-  currentRecordIndex = -1;
-  get: StateXGetter = useStateXGetter();
-  set: StateXSetter = useStateXSetter();
-  constructor(ds: string, alias: string) {
-    this.ds = ds;
-    this.alias = alias;
-  }
+import { useStateXValue } from '@cloudio/statex';
+import useDataStore from './useDataStore';
 
-  getRecords() {
-    return this.get(['root', 'page22', this.ds, this.alias, 'records']);
-  }
+export default (ds: string, alias: string) => {
+  //todo use pageId in path
+  useStateXValue([ds, alias], []);
+  const store = useDataStore(ds, alias);
 
-  setRecords(records: any) {
-    this.set(['root', 'page22', this.ds, this.alias, 'records'], records);
-  }
-  query() {
-    const reqBody = {
-      [this.alias]: {
-        ds: this.ds,
-        query: {
-          filter: {},
-        },
-      },
-    };
-    let bearer_token = 'WfKc_ZsfwBrhE2Ae8ZLoo';
-    const bearer = 'Bearer ' + bearer_token;
-    const url = 'http://localhost:3000/api';
-    const options = {
-      method: 'POST',
-      headers: { Authorization: bearer, 'Content-Type': 'application/json' },
-      body: JSON.stringify(reqBody),
-    };
-    fetch(url, options)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data[this.alias].data.length) {
-          this.currentRecord = data[this.alias].data[0];
-          this.currentRecordIndex = 0;
-        } else {
-          this.currentRecord = null;
-          this.currentRecordIndex = -1;
-        }
-        this.setRecords(data[this.alias].data);
-      })
-      .catch((error) => console.log('error from fetching', error));
-  }
-}
-
-const cache = new Map<string, Store>();
-export const getDataStore = (ds: string, alias: string) => {
-  let store = cache.get(ds + alias);
-  if (!store) {
-    store = new Store(ds, alias);
-    cache.set(ds + alias, store);
-  }
   return {
-    records: store.getRecords(),
     query: store.query,
-    currentRecord: store.currentRecord,
-    currentRecordIndex: store.currentRecordIndex,
+    insertRecordPartial: store.insertRecordPartial,
+    updateRecord: store.updateRecord,
+    deleteRecord: store.delete,
+    dirtyRecords: store.dirtyRecords,
+    save: store.save,
+    records: store.records,
+    isDirty: store.isDirty,
   };
 };
-
-export default Store;

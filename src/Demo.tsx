@@ -1,6 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect } from 'react';
-import Paper from '@material-ui/core/Paper';
+import React, { useState } from 'react';
 import { EditingState } from '@devexpress/dx-react-grid';
 import {
   Grid,
@@ -9,75 +8,88 @@ import {
   TableEditRow,
   TableEditColumn,
 } from '@devexpress/dx-react-grid-material-ui';
-import {
-  useStateX,
-  useStateXGetter,
-  useStateXSetter,
-  useStateXValueRemover,
-  selector,
-  useRemoveStateX,
-} from '@cloudio/statex';
-import { getDataStore } from './Store';
+import { Button } from '@material-ui/core';
+import useStateXStore from './useStateXStore';
 
+//todo performance optimization using usememo|usecallback
 export default function Demo() {
-  const refresh = () => {
-    const filter = { _deleted: 'N' };
-    store.query(filter);
-  };
-
-  const columns = [
-    { name: '_id', title: 'Id' },
-    { name: 'name', title: 'Name' },
-    { name: 'gender', title: 'Gender' },
-    // { name: 'bloodGroup', title: 'Blood Group' },
-  ];
-  useStateX(['employee', 'list'], []);
-  useStateX(['employee', 'deleted-list'], []);
   const ds = 'app-employees';
   const alias = 'employeesStore';
-  const get = useStateXGetter();
-  const set = useStateXSetter();
+  const {
+    deleteRecord,
+    query,
+    insertRecordPartial,
+    updateRecord,
+    records,
+    save,
+    isDirty,
+  } = useStateXStore(ds, alias);
 
-  const remover = useRemoveStateX(['employee', 'deleted-list']);
+  const saveClick = () => {
+    save();
+  };
 
-  const store = getDataStore(ds, alias, set, get, remover);
+  const refresh = () => {
+    const filter = { _deleted: 'N' };
+    query(filter);
+  };
 
-  const rows: any = store.getRecords();
+  const disabled = !isDirty();
+
+  const rows: any = records().filter((record: any) => record._rs !== 'D');
 
   const [editingStateColumnExtensions] = useState([
     { columnName: '_id', editingEnabled: false },
   ]);
 
   const commitChanges = ({ added, changed, deleted }) => {
-    let changedRows;
     if (added) {
       Object.keys(added).forEach((key) => {
-        store.insertRecordPartial(added[key]);
+        insertRecordPartial(added[key]);
       });
     }
     if (changed) {
       Object.keys(changed).forEach((key) => {
-        store.updateRecordPartial(parseInt(key), changed[key]);
+        updateRecord(parseInt(key), changed[key]);
       });
     }
     if (deleted) {
       Object.keys(deleted).forEach((key) => {
-        store.delete(parseInt(deleted[key]));
+        deleteRecord(parseInt(deleted[key]));
       });
     }
-    console.log(changedRows);
-    store.save();
-    // store.query();
   };
+
+  const columns = [
+    { name: '_id', title: 'Id' },
+    { name: 'name', title: 'Name' },
+    { name: 'gender', title: 'Gender' },
+  ];
 
   return (
     <>
-      <button onClick={refresh}>Refresh</button>
+      {/* <h4>State Values</h4>
+      <pre>{JSON.stringify(json, null, 2)}</pre>; */}
+      <Button
+        style={{ marginLeft: '50px' }}
+        onClick={refresh}
+        variant='outlined'
+        color='primary'>
+        Refresh
+      </Button>
+
+      <Button
+        style={{ marginLeft: '50px' }}
+        onClick={saveClick}
+        variant='outlined'
+        color='secondary'
+        disabled={disabled}>
+        Save
+      </Button>
       <Grid rows={rows} columns={columns}>
         <EditingState
           onCommitChanges={commitChanges}
           columnExtensions={editingStateColumnExtensions}
-          // onDeletedRowIdsChange={onDeleteRows}
         />
         <Table />
         <TableHeaderRow />

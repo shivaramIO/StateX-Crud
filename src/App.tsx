@@ -1,8 +1,7 @@
 import React from 'react';
-import { useStateXValue, useStateX } from '@cloudio/statex';
+import { useStateX } from '@cloudio/statex';
 // import EmloyeesUIWithStore from './EmloyeesUIWithStore';
 import Demo from './Demo';
-import CrudTable from './CrudTable';
 
 function JSONPayload() {
   const json = useStateX([], []);
